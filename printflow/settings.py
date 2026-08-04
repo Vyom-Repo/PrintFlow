@@ -95,9 +95,14 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Supabase Configuration
+SUPABASE_URL = config('SUPABASE_URL', default=None)
+SUPABASE_KEY = config('SUPABASE_KEY', default=None)
+SUPABASE_BUCKET = config('SUPABASE_BUCKET', default='printflow')
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "printflow.storage.SupabaseStorage" if SUPABASE_URL else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
