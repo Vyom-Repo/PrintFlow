@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}All Orders — PrintFlow{% endblock %}
+{% block nav_all_orders %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header flex-between">
+        <div>
+            <h1>📋 All Orders</h1>
+            <p>Complete order history across all users</p>
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <a href="?status=all" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-ghost{% endif %}">All</a>
+            <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning{% else %}btn-ghost{% endif %}">Pending</a>
+            <a href="?status=printing" class="btn btn-sm {% if status_filter == 'printing' %}btn-primary{% else %}btn-ghost{% endif %}">Printing</a>
+            <a href="?status=printed" class="btn btn-sm {% if status_filter == 'printed' %}btn-success{% else %}btn-ghost{% endif %}">Printed</a>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Document</th>
+                    <th>Pages</th>
+                    <th>Options</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Paid</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <a href="{% url 'dashboard:user_detail' order.user.id %}">
+                            {{ order.user.get_full_name|default:order.user.username }}
+                        </a>
+                    </td>
+                    <td style="font-weight: 500;">{{ order.original_filename|truncatechars:25 }}</td>
+                    <td>{{ order.page_count }}</td>
+                    <td class="text-muted" style="font-size: 0.82rem;">
+                        {{ order.get_side_type_display }} · {{ order.get_color_type_display }}
+                    </td>
+                    <td class="price-tag">₹{{ order.price }}</td>
+                    <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td>
+                        {% if order.is_paid %}
+                            <span class="badge badge-paid">Paid</span>
+                        {% else %}
+                            <span class="badge badge-unpaid">Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ order.created_at|date:"d M, H:i" }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{{ order.document.url }}" class="btn btn-ghost btn-sm" target="_blank">📄</a>
+                            {% if order.status == 'pending' %}
+                            <a href="{% url 'dashboard:mark_printed' order.id %}" class="btn btn-success btn-sm">✅</a>
+                            {% endif %}
+                            <a href="{% url 'dashboard:mark_paid' order.id %}" class="btn btn-sm {% if order.is_paid %}btn-ghost{% else %}btn-primary{% endif %}">💰</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No orders found</h3>
+        <p>{% if status_filter != 'all' %}Try changing the filter above.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

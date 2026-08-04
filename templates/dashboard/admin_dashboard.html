@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Admin Dashboard — PrintFlow{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Left Sidebar: Friends List -->
+    <aside class="sidebar">
+        <h3>👥 Registered Friends ({{ stats.total_users }})</h3>
+
+        {% for u in users %}
+        <a href="{% url 'dashboard:user_detail' u.id %}" class="sidebar-user">
+            <div class="sidebar-user-avatar">
+                {{ u.first_name|default:u.username|first|upper }}
+            </div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name">{{ u.get_full_name|default:u.username }}</div>
+                <div class="sidebar-user-meta">{{ u.order_count }} order{{ u.order_count|pluralize }} · ₹{{ u.total_spent|default:0|floatformat:2 }}</div>
+            </div>
+            {% if not u.profile.is_approved %}
+            <a href="{% url 'dashboard:approve_user' u.id %}" class="btn btn-warning btn-sm" style="margin-left:auto; font-size: 0.7rem; padding: 2px 6px;">Approve</a>
+            {% elif u.pending_count > 0 %}
+            <span class="sidebar-user-badge">{{ u.pending_count }}</span>
+            {% endif %}
+        </a>
+        {% empty %}
+        <p class="text-muted" style="font-size: 0.85rem; padding: 0.5rem;">No friends registered yet. Share the signup link!</p>
+        {% endfor %}
+    </aside>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main">
+        <div class="page-header">
+            <h1>🖨️ Print Queue</h1>
+            <p>Manage incoming print orders from your friends</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" style="color: var(--warning);">{{ stats.total_pending }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: var(--info);">{{ stats.total_printing }}</div>
+                <div class="stat-label">Printing</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.today_orders }}</div>
+                <div class="stat-label">Today's Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: var(--success);">₹{{ stats.today_revenue }}</div>
+                <div class="stat-label">Today's Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: var(--danger);">₹{{ stats.total_unpaid }}</div>
+                <div class="stat-label">Total Unpaid</div>
+            </div>
+        </div>
+
+        <!-- Order Queue -->
+        {% if active_orders %}
+        <div class="order-queue">
+            {% for order in active_orders %}
+            <div class="order-card">
+                <div class="order-card-header">
+                    <div class="order-card-title">
+                        <span class="file-icon">{% if order.file_type == "PDF" %}📕{% else %}🖼️{% endif %}</span>
+                        {{ order.original_filename|truncatechars:40 }}
+                    </div>
+                    <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+
+                <div class="order-card-meta">
+                    <span>👤 {{ order.user.get_full_name|default:order.user.username }}</span>
+                    <span>📄 {{ order.page_count }} page{{ order.page_count|pluralize }}</span>
+                    <span>{{ order.get_side_type_display }}</span>
+                    <span>{{ order.get_color_type_display }}</span>
+                    <span>{{ order.get_layout_display }}</span>
+                    {% if order.copies > 1 %}<span>×{{ order.copies }} copies</span>{% endif %}
+                    <span>📦 {{ order.file_size_display }}</span>
+                </div>
+
+                {% if order.instructions %}
+                <div class="order-card-instructions">
+                    💬 "{{ order.instructions }}"
+                </div>
+                {% endif %}
+
+                <div class="order-card-footer">
+                    <div class="order-price">₹{{ order.price }}</div>
+                    <div class="table-actions">
+                        <a href="{{ order.document.url }}" class="btn btn-ghost btn-sm" target="_blank">📄 Open</a>
+
+                        {% if order.status == 'pending' %}
+                        <a href="{% url 'dashboard:mark_printing' order.id %}" class="btn btn-warning btn-sm">🖨️ Printing</a>
+                        <a href="{% url 'dashboard:mark_printed' order.id %}" class="btn btn-success btn-sm">✅ Printed</a>
+                        {% elif order.status == 'printing' %}
+                        <a href="{% url 'dashboard:mark_printed' order.id %}" class="btn btn-success btn-sm">✅ Done</a>
+                        {% endif %}
+
+                        <a href="{% url 'dashboard:mark_paid' order.id %}" class="btn btn-sm {% if order.is_paid %}btn-ghost{% else %}btn-primary{% endif %}">
+                            💰 {% if order.is_paid %}Paid{% else %}Mark Paid{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <h3>All caught up!</h3>
+            <p>No pending print orders right now. Relax!</p>
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

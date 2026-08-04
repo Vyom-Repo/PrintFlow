@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ target_user.get_full_name|default:target_user.username }} — PrintFlow{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <p><a href="{% url 'dashboard:admin_dashboard' %}" class="text-muted">← Back to Dashboard</a></p>
+        <h1>👤 {{ target_user.get_full_name|default:target_user.username }}</h1>
+        <p>@{{ target_user.username }} · Joined {{ target_user.date_joined|date:"d M Y" }}</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ orders.count }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--accent);">₹{{ total_spent|floatformat:2 }}</div>
+            <div class="stat-label">Total Spent</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--danger);">₹{{ total_unpaid|floatformat:2 }}</div>
+            <div class="stat-label">Unpaid Balance</div>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Order History</h3>
+            {% if total_unpaid > 0 %}
+            <a href="{% url 'dashboard:mark_all_paid' target_user.id %}" class="btn btn-primary btn-sm">💰 Mark All Paid</a>
+            {% endif %}
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Pages</th>
+                        <th>Options</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Paid</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ order.original_filename|truncatechars:30 }}</td>
+                        <td>{{ order.page_count }}</td>
+                        <td class="text-muted" style="font-size: 0.82rem;">
+                            {{ order.get_side_type_display }} · {{ order.get_color_type_display }}
+                        </td>
+                        <td class="price-tag">₹{{ order.price }}</td>
+                        <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                        <td>
+                            {% if order.is_paid %}
+                                <span class="badge badge-paid">Paid</span>
+                            {% else %}
+                                <span class="badge badge-unpaid">Unpaid</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ order.created_at|date:"d M, H:i" }}</td>
+                        <td>
+                            <div class="table-actions">
+                                <a href="{{ order.document.url }}" class="btn btn-ghost btn-sm" target="_blank">📄</a>
+                                {% if not order.is_paid %}
+                                <a href="{% url 'dashboard:mark_paid' order.id %}" class="btn btn-primary btn-sm">💰 Paid</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No orders from this user yet</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

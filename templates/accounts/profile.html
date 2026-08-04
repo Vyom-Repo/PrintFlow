@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}My Profile — PrintFlow{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>👤 My Profile</h1>
+        <p>Your account details and order summary</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ profile.total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ profile.pending_orders }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">₹{{ profile.total_spent|floatformat:2 }}</div>
+            <div class="stat-label">Total Spent</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">₹{{ profile.total_unpaid|floatformat:2 }}</div>
+            <div class="stat-label">Unpaid</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Account Details</h3>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">Name</div>
+                <div class="detail-value">{{ user.get_full_name|default:user.username }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Username</div>
+                <div class="detail-value">{{ user.username }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Phone</div>
+                <div class="detail-value">{{ profile.phone|default:"Not set" }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Joined</div>
+                <div class="detail-value">{{ user.date_joined|date:"d M Y" }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if recent_orders %}
+    <div class="card mt-2">
+        <div class="card-header">
+            <h3>Recent Orders</h3>
+            <a href="{% url 'orders:my_orders' %}" class="btn btn-ghost btn-sm">View All</a>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Pages</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>{{ order.original_filename|truncatechars:30 }}</td>
+                        <td>{{ order.page_count }}</td>
+                        <td class="price-tag">₹{{ order.price }}</td>
+                        <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                        <td class="text-muted">{{ order.created_at|date:"d M, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

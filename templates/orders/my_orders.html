@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}My Orders — PrintFlow{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header flex-between">
+        <div>
+            <h1>📋 My Orders</h1>
+            <p>Track all your print orders and their status</p>
+        </div>
+        <a href="{% url 'orders:upload' %}" class="btn btn-primary">📤 New Upload</a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--warning);">{{ pending_count }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--success);">{{ printed_count }}</div>
+            <div class="stat-label">Printed</div>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Type</th>
+                    <th>Pages</th>
+                    <th>Options</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Paid</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <a href="{% url 'orders:order_detail' order.id %}" style="font-weight: 500;">
+                            {{ order.original_filename|truncatechars:35 }}
+                        </a>
+                    </td>
+                    <td class="text-muted">{{ order.file_type }}</td>
+                    <td>{{ order.page_count }}</td>
+                    <td class="text-muted" style="font-size: 0.82rem;">
+                        {{ order.get_side_type_display }} · {{ order.get_color_type_display }}
+                        {% if order.copies > 1 %} · ×{{ order.copies }}{% endif %}
+                    </td>
+                    <td class="price-tag">₹{{ order.price }}</td>
+                    <td><span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td>
+                        {% if order.is_paid %}
+                            <span class="badge badge-paid">Paid</span>
+                        {% else %}
+                            <span class="badge badge-unpaid">Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ order.created_at|date:"d M, H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No orders yet</h3>
+        <p>Upload your first document to get started!</p>
+        <a href="{% url 'orders:upload' %}" class="btn btn-primary">📤 Upload Document</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

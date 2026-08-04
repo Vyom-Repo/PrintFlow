@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PrintFlow{% endblock %}</title>
+    <meta name="description" content="PrintFlow — Your friend group's print management hub">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="{% if user.is_staff %}{% url 'dashboard:admin_dashboard' %}{% else %}{% url 'orders:my_orders' %}{% endif %}" class="navbar-brand">
+            🖨️ <span>Print</span>Flow
+        </a>
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <li><a href="{% url 'dashboard:admin_dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}">Dashboard</a></li>
+                    <li><a href="{% url 'dashboard:all_orders' %}" class="nav-link {% block nav_all_orders %}{% endblock %}">All Orders</a></li>
+                {% else %}
+                    <li><a href="{% url 'orders:my_orders' %}" class="nav-link {% block nav_orders %}{% endblock %}">My Orders</a></li>
+                    <li><a href="{% url 'orders:upload' %}" class="nav-link {% block nav_upload %}{% endblock %}">Upload</a></li>
+                    <li><a href="{% url 'accounts:profile' %}" class="nav-link {% block nav_profile %}{% endblock %}">Profile</a></li>
+                {% endif %}
+                <li><span class="nav-user">{{ user.first_name|default:user.username }}</span></li>
+                <li><a href="{% url 'accounts:logout' %}" class="nav-link">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'accounts:login' %}" class="nav-link">Login</a></li>
+                <li><a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-sm">Sign Up</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="container" style="padding-bottom: 0;">
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="message message-{{ message.tags }}">
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

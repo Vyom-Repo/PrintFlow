@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Upload Document — PrintFlow{% endblock %}
+{% block nav_upload %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>📤 Upload Document</h1>
+        <p>Upload your file and choose print options — price is calculated automatically</p>
+    </div>
+
+    <div class="card">
+        <form method="post" action="{% url 'orders:upload' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- File Upload Area -->
+            <div class="form-group">
+                <label class="form-label">Upload Document</label>
+                <div class="file-upload-area" id="dropArea">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag & drop<br>
+                        <small class="text-muted">PDF, JPG, PNG — Max 10 MB</small>
+                    </div>
+                    <div id="fileNameDisplay" style="margin-top: 8px; color: var(--accent); font-weight: 500; display: none;"></div>
+                    {{ form.document }}
+                </div>
+                {% if form.document.errors %}
+                    <div class="form-error">{{ form.document.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Print Options -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="id_side_type">Printing Side</label>
+                    {{ form.side_type }}
+                    <div class="form-help">Single-sided: ₹0.50/page · Double-sided: ₹0.33/page</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_color_type">Color Option</label>
+                    {{ form.color_type }}
+                    <div class="form-help">Color printing is 3× the base price</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="id_layout">Page Layout</label>
+                    {{ form.layout }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_copies">Number of Copies</label>
+                    {{ form.copies }}
+                    {% if form.copies.errors %}
+                        <div class="form-error">{{ form.copies.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="id_instructions">Special Instructions</label>
+                {{ form.instructions }}
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
+                📤 Submit Print Order
+            </button>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// File name display on selection
+const fileInput = document.getElementById('id_document');
+const fileDisplay = document.getElementById('fileNameDisplay');
+const dropArea = document.getElementById('dropArea');
+
+if (fileInput) {
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            fileDisplay.textContent = '📎 ' + this.files[0].name;
+            fileDisplay.style.display = 'block';
+            dropArea.style.borderColor = 'var(--accent)';
+            dropArea.style.background = 'var(--accent-glow)';
+        }
+    });
+}
+
+// Drag and drop visual feedback
+if (dropArea) {
+    dropArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'var(--accent)';
+        this.style.background = 'var(--accent-glow)';
+    });
+    dropArea.addEventListener('dragleave', function() {
+        this.style.borderColor = '';
+        this.style.background = '';
+    });
+    dropArea.addEventListener('drop', function() {
+        this.style.borderColor = 'var(--accent)';
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}

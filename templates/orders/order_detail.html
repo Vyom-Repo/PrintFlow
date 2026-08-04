@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ order.original_filename }} — PrintFlow{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <p><a href="{% url 'orders:my_orders' %}" class="text-muted">← Back to My Orders</a></p>
+        <h1 style="display: flex; align-items: center; gap: 10px;">
+            📄 {{ order.original_filename|truncatechars:40 }}
+            <span class="badge badge-{{ order.status }}">{{ order.get_status_display }}</span>
+        </h1>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <div class="detail-label">File Type</div>
+            <div class="detail-value">{{ order.file_type }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">File Size</div>
+            <div class="detail-value">{{ order.file_size_display }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Pages</div>
+            <div class="detail-value">{{ order.page_count }} page{{ order.page_count|pluralize }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Copies</div>
+            <div class="detail-value">{{ order.copies }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Printing Side</div>
+            <div class="detail-value">{{ order.get_side_type_display }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Color</div>
+            <div class="detail-value">{{ order.get_color_type_display }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Layout</div>
+            <div class="detail-value">{{ order.get_layout_display }}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-label">Price</div>
+            <div class="detail-value price-tag" style="color: var(--accent); font-size: 1.2rem;">₹{{ order.price }}</div>
+        </div>
+    </div>
+
+    {% if order.instructions %}
+    <div class="card mt-2">
+        <div class="card-header">
+            <h3>📝 Special Instructions</h3>
+        </div>
+        <p style="color: var(--text-secondary); font-style: italic;">{{ order.instructions }}</p>
+    </div>
+    {% endif %}
+
+    <div class="card mt-2">
+        <div class="card-header">
+            <h3>📊 Order Timeline</h3>
+        </div>
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">Submitted</div>
+                <div class="detail-value">{{ order.created_at|date:"d M Y, H:i" }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Printed At</div>
+                <div class="detail-value">
+                    {% if order.printed_at %}
+                        {{ order.printed_at|date:"d M Y, H:i" }}
+                    {% else %}
+                        <span class="text-muted">Not yet printed</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Payment</div>
+                <div class="detail-value">
+                    {% if order.is_paid %}
+                        <span class="badge badge-paid">Paid</span>
+                    {% else %}
+                        <span class="badge badge-unpaid">Unpaid</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Last Updated</div>
+                <div class="detail-value">{{ order.updated_at|date:"d M Y, H:i" }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
