@@ -1,9 +1,21 @@
-venv/
+# Python
 __pycache__/
-*.pyc
-db.sqlite3
-.env
-media/documents/*
-!media/documents/.gitkeep
+*.py[cod]
+*.egg-info/
 *.log
+
+# Virtual Environment
+venv/
+.env
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# macOS
 .DS_Store
+
+# IDE
+.vscode/
+.idea/
