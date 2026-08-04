@@ -58,9 +58,10 @@ class SupabaseStorage(Storage):
             return False
 
     def url(self, name):
-        # Return the public URL for the file
+        # Return a signed URL valid for 1 hour (3600 seconds) since the bucket is private
         name = str(name).replace('\\', '/')
-        return self.client.storage.from_(self.bucket).get_public_url(name)
+        res = self.client.storage.from_(self.bucket).create_signed_url(name, 3600)
+        return res.get('signedURL')
 
     def delete(self, name):
         name = str(name).replace('\\', '/')
