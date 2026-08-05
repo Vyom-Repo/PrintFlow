@@ -25,7 +25,7 @@
                 <tr>
                     <th>User</th>
                     <th>Document</th>
-                    <th>Pages</th>
+                    <th>Pages (Print / Total)</th>
                     <th>Options</th>
                     <th>Price</th>
                     <th>Status</th>
@@ -43,7 +43,16 @@
                         </a>
                     </td>
                     <td style="font-weight: 500;">{{ order.original_filename|truncatechars:25 }}</td>
-                    <td>{{ order.page_count }}</td>
+                    <td>
+                        {% if order.print_mode == 'specific' and order.page_selection %}
+                            <span title="Printing pages: {{ order.page_selection }}">
+                                {{ order.printable_page_count }} / {{ order.page_count }}
+                                <small class="text-muted">({{ order.page_selection }})</small>
+                            </span>
+                        {% else %}
+                            {{ order.printable_page_count }}
+                        {% endif %}
+                    </td>
                     <td class="text-muted" style="font-size: 0.82rem;">
                         {{ order.get_side_type_display }} · {{ order.get_color_type_display }}
                     </td>
@@ -59,7 +68,11 @@
                     <td class="text-muted">{{ order.created_at|date:"d M, H:i" }}</td>
                     <td>
                         <div class="table-actions">
-                            <a href="{{ order.document.url }}" class="btn btn-ghost btn-sm" target="_blank">📄</a>
+                            {% if order.print_file_url %}
+                            <a href="{{ order.print_file_url }}" class="btn btn-ghost btn-sm" target="_blank">📄</a>
+                            {% else %}
+                            <span class="btn btn-ghost btn-sm" style="opacity:0.4; cursor:not-allowed;">📄</span>
+                            {% endif %}
                             {% if order.status == 'pending' %}
                             <a href="{% url 'dashboard:mark_printed' order.id %}" class="btn btn-success btn-sm">✅</a>
                             {% endif %}

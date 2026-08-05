@@ -53,7 +53,17 @@
                         </a>
                     </td>
                     <td class="text-muted">{{ order.file_type }}</td>
-                    <td>{{ order.page_count }}</td>
+                    <td>
+                        {% if order.print_mode == 'specific' and order.page_selection %}
+                            {# Show printable pages; tooltip reveals full range #}
+                            <span title="Printing pages {{ order.page_selection }} of {{ order.page_count }} total">
+                                {{ order.printable_page_count }}
+                                <small class="text-muted">/ {{ order.page_count }}</small>
+                            </span>
+                        {% else %}
+                            {{ order.printable_page_count }}
+                        {% endif %}
+                    </td>
                     <td class="text-muted" style="font-size: 0.82rem;">
                         {{ order.get_side_type_display }} · {{ order.get_color_type_display }}
                         {% if order.copies > 1 %} · ×{{ order.copies }}{% endif %}

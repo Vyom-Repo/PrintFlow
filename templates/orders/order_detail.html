@@ -22,9 +22,42 @@
             <div class="detail-value">{{ order.file_size_display }}</div>
         </div>
         <div class="detail-item">
-            <div class="detail-label">Pages</div>
+            <div class="detail-label">Total Pages (Original)</div>
             <div class="detail-value">{{ order.page_count }} page{{ order.page_count|pluralize }}</div>
         </div>
+
+        <!-- Page selection details -->
+        <div class="detail-item">
+            <div class="detail-label">Print Mode</div>
+            <div class="detail-value">
+                {% if order.print_mode == 'specific' %}
+                    🎯 Specific Pages
+                {% else %}
+                    📑 All Pages
+                {% endif %}
+            </div>
+        </div>
+
+        {% if order.print_mode == 'specific' and order.page_selection %}
+        <div class="detail-item">
+            <div class="detail-label">Page Selection</div>
+            <div class="detail-value" style="font-family: monospace; color: var(--accent);">
+                {{ order.page_selection }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="detail-item">
+            <div class="detail-label">Printable Pages</div>
+            <div class="detail-value">
+                {{ order.printable_page_count }} page{{ order.printable_page_count|pluralize }}
+                {% if order.print_mode == 'specific' %}
+                    <small class="text-muted">(of {{ order.page_count }} total)</small>
+                {% endif %}
+            </div>
+        </div>
+        <!-- /Page selection details -->
+
         <div class="detail-item">
             <div class="detail-label">Copies</div>
             <div class="detail-value">{{ order.copies }}</div>

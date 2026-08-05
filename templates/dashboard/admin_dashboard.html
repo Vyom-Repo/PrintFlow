@@ -75,7 +75,17 @@
 
                 <div class="order-card-meta">
                     <span>👤 {{ order.user.get_full_name|default:order.user.username }}</span>
-                    <span>📄 {{ order.page_count }} page{{ order.page_count|pluralize }}</span>
+
+                    {% if order.print_mode == 'specific' and order.page_selection %}
+                        {# Show printable pages and total so admin knows exactly what's in the PDF #}
+                        <span title="Pages to print">
+                            📄 {{ order.printable_page_count }} page{{ order.printable_page_count|pluralize }}
+                            <small style="opacity:0.65;">(pages {{ order.page_selection }})</small>
+                        </span>
+                    {% else %}
+                        <span>📄 {{ order.printable_page_count }} page{{ order.printable_page_count|pluralize }}</span>
+                    {% endif %}
+
                     <span>{{ order.get_side_type_display }}</span>
                     <span>{{ order.get_color_type_display }}</span>
                     <span>{{ order.get_layout_display }}</span>
@@ -92,7 +102,11 @@
                 <div class="order-card-footer">
                     <div class="order-price">₹{{ order.price }}</div>
                     <div class="table-actions">
-                        <a href="{{ order.document.url }}" class="btn btn-ghost btn-sm" target="_blank">📄 Open</a>
+                        {% if order.print_file_url %}
+                        <a href="{{ order.print_file_url }}" class="btn btn-ghost btn-sm" target="_blank">📄 Open</a>
+                        {% else %}
+                        <span class="btn btn-ghost btn-sm" style="opacity:0.4; cursor:not-allowed;">📄 No File</span>
+                        {% endif %}
 
                         {% if order.status == 'pending' %}
                         <a href="{% url 'dashboard:mark_printing' order.id %}" class="btn btn-warning btn-sm">🖨️ Printing</a>
