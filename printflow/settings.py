@@ -113,9 +113,9 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Auth redirects
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/orders/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'orders:my_orders'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 # File upload config
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
